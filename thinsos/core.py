@@ -161,18 +161,18 @@ class SOS(object):
         body = self.body_base.copy()
 
         if isinstance(foi, str):
-            da2 = da1[da1.featureOfInterest == foi]
-            if da2.empty:
+            da1 = da1[da1.featureOfInterest == foi]
+            if da1.empty:
                 raise ValueError('foi does not exist')
             body.update({'featureOfInterest': foi})
         if isinstance(observed_property, str):
-            da3 = da2[da2.observedProperty == observed_property]
-            if da3.empty:
+            da1 = da1[da1.observedProperty == observed_property]
+            if da1.empty:
                 raise ValueError('observedProperty does not exist')
             body.update({'observedProperty': observed_property})
         if isinstance(procedure, str):
-            da3 = da3[da3.procedure == procedure]
-            if da3.empty:
+            da1 = da1[da1.procedure == procedure]
+            if da1.empty:
                 raise ValueError('procedure does not exist')
             body.update({'procedure': procedure})
         if isinstance(from_date, str) | isinstance(to_date, str):

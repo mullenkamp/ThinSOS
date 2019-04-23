@@ -23,7 +23,7 @@ install:
   - conda list
 
 script:
-  - py.test eto --cov eto -v --cov-report term-missing
+  - py.test thinsos --cov thinsos -v --cov-report term-missing
 
 after_success:
   - codecov

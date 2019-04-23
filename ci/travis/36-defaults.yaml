@@ -5,6 +5,7 @@ dependencies:
   - python=3.6
   # required
   - pandas
+  - requests
   # testing
   - pytest
   - pytest-cov

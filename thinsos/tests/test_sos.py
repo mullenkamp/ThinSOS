@@ -4,7 +4,6 @@ Created on Mon Apr 22 09:50:00 2019
 
 @author: michaelek
 """
-
 from thinsos import SOS
 import pandas as pd
 
@@ -13,67 +12,66 @@ pd.options.display.max_columns = 10
 ###################################
 ### Parameters
 
-url = 'http://sensorweb.demo.52north.org/sensorwebtestbed/service'
-url = 'https://climate-sos.niwa.co.nz'
-token = ''
+url1 = 'http://sensorweb.demo.52north.org/sensorwebtestbed/service'
 
-foi = '17244'
-observed_property = 'MTHLY_STATS: TOTAL RAINFALL (MTHLY: TOTAL RAIN)'
+foi1 = 'Vaisala-WXT520'
+observed_property1 = 'WindSpeedAverage'
 
-foi = 'Vaisala-WXT520'
-observed_property = 'WindSpeedAverage'
+from_date1 = '2015-07-01'
+to_date1 = '2015-07-10'
 
-from_date = '2018-06-01'
-to_date = '2018-10-01'
+url2 = 'https://climate-sos.niwa.co.nz'
 
-from_date = '2015-07-01'
-to_date = '2015-08-01'
+foi2 = '17244'
+observed_property2 = 'MTHLY_STATS: TOTAL RAINFALL (MTHLY: TOTAL RAIN)'
 
-bbox = [[169.34, -45.3], [174.2, -41.7]]
-bbox = [[0, 0], [60, 60]]
+from_date2 = '2018-06-01'
+to_date2 = '2018-10-01'
+
+#bbox = [[169.34, -45.3], [174.2, -41.7]]
+#bbox = [[0, 0], [60, 60]]
 
 ###################################
 ### Tests
 
+## 52 North test server
 
-sos1 = SOS(url, token)
+def test_sos1():
+    sos1 = SOS(url1)
 
-json1 = sos1.get_capabilities()
+    assert isinstance(sos1.capabilities, dict) & isinstance(sos1.data_availability, pd.DataFrame) & (len(sos1.capabilities) == 8) & (len(sos1.data_availability) > 40)
 
-#j1 = pd.read_json(json1)
-#
-#j2 = pd.DataFrame.from_dict(json1)
+sos1 = SOS(url1)
 
-json2 = sos1.get_capabilities('all')
+def test_get_foi1():
+    foi_df1 = sos1.get_foi()
 
+    assert isinstance(foi_df1, pd.DataFrame) & (len(foi_df1) >= 4)
 
-da1 = sos1.get_data_availability()
-da1 = sos1.get_data_availability(foi=foi)
+def test_get_observation1():
+    obs_df1 = sos1.get_observation(foi1, observed_property1, from_date=from_date1, to_date=to_date1)
 
-da2 = da1[da1.procedure == 'C'].copy()
-da2.observedProperty.value_counts()
-
-foi1 = sos1.get_foi()
-#foi2 = sos1.get_foi(bbox=bbox)
+    assert isinstance(obs_df1, pd.DataFrame) & (len(obs_df1) >= 800)
 
 
-obs1 = sos1.get_observation(foi, observed_property, from_date=from_date, to_date=to_date)
+## NIWA climate server
 
-obs1.json()['observations']
+def test_sos2():
+    sos2 = SOS(url2)
 
-body = sos1.filters(foi, procedure=None, observed_property=observed_property, from_date=from_date, to_date=to_date)
+    assert isinstance(sos2.capabilities, dict) & isinstance(sos2.data_availability, pd.DataFrame) & (len(sos2.capabilities) == 8) & (len(sos2.data_availability) > 3000)
 
+sos2 = SOS(url2)
 
+def test_get_foi2():
+    foi_df2 = sos2.get_foi()
 
+    assert isinstance(foi_df2, pd.DataFrame) & (len(foi_df2) >= 55)
 
+def test_get_observation2():
+    obs_df2 = sos2.get_observation(foi2, observed_property2, from_date=from_date2, to_date=to_date2)
 
-
-
-
-
-
-
-
+    assert isinstance(obs_df2, pd.DataFrame) & (len(obs_df2) == 5)
 
 
 
