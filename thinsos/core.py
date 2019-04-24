@@ -304,7 +304,7 @@ class SOS(object):
         return df1.drop('phenomenonTime', axis=1)
 
 
-    def get_foi(self, foi=None):
+    def get_foi(self, foi=None, bbox=None):
         """
 
         """
@@ -328,6 +328,10 @@ class SOS(object):
 
         lst1 = [foi_parse(j) for j in json1 if isinstance(j, dict)]
         df1 = pd.DataFrame(lst1)
+
+        ## bbox select
+        if isinstance(bbox, list):
+            df1 = df1[(df1.lon >= bbox[0][0]) & (df1.lat >= bbox[0][1]) & (df1.lon <= bbox[1][0]) & (df1.lat <= bbox[1][1])].copy()
 
         return df1
 

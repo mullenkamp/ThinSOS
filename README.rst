@@ -4,7 +4,7 @@ Still a work in progress...but GetCapabilities, GetDataAvailability, GetFeatureO
 
 This package was inspired by `py4sos <https://github.com/manuGil/py4sos>`_.
 
-ThinSOS GitHub repo is here: `https://github.com/Data-to-Knowledge/ThinSOS`_
+ThinSOS GitHub repo is here: `ThinSOS <https://github.com/Data-to-Knowledge/ThinSOS>`_
 
 Installation
 ------------
