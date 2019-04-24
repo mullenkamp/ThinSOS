@@ -28,7 +28,7 @@ observed_property2 = 'MTHLY_STATS: TOTAL RAINFALL (MTHLY: TOTAL RAIN)'
 from_date2 = '2018-06-01'
 to_date2 = '2018-10-01'
 
-#bbox = [[169.34, -45.3], [174.2, -41.7]]
+bbox = [[169, -45.5], [174.2, -41.7]]
 #bbox = [[0, 0], [60, 60]]
 
 ###################################
@@ -64,9 +64,9 @@ def test_sos2():
 sos2 = SOS(url2)
 
 def test_get_foi2():
-    foi_df2 = sos2.get_foi()
+    foi_df2 = sos2.get_foi(bbox=bbox)
 
-    assert isinstance(foi_df2, pd.DataFrame) & (len(foi_df2) >= 55)
+    assert isinstance(foi_df2, pd.DataFrame) & (len(foi_df2) >= 20)
 
 def test_get_observation2():
     obs_df2 = sos2.get_observation(foi2, observed_property2, from_date=from_date2, to_date=to_date2)
