@@ -175,15 +175,15 @@ class SOS(object):
             if da1.empty:
                 raise ValueError('procedure does not exist')
             body.update({'procedure': procedure})
-        if isinstance(from_date, str) | isinstance(to_date, str):
+        if self.request == 'GetObservation':
             if isinstance(from_date, str):
                 from_date1 = pd.Timestamp(from_date).isoformat() + 'Z'
             else:
-                from_date1 = da3.fromDate.min().isoformat() + 'Z'
+                from_date1 = da1.fromDate.min().strftime('%Y-%m-%dT%H:%M:%SZ')
             if isinstance(to_date, str):
                 to_date1 = pd.Timestamp(to_date).isoformat() + 'Z'
             else:
-                to_date1 = da3.toDate.min().isoformat() + 'Z'
+                to_date1 = da1.toDate.min().strftime('%Y-%m-%dT%H:%M:%SZ')
 
 #            tf = {"temporalFilter": {
 #                    "during": {
@@ -340,6 +340,7 @@ class SOS(object):
         """
 
         """
+        self.request = 'GetObservation'
         body = self.filters(foi, procedure, observed_property, from_date, to_date)
         body.update({'request': 'GetObservation'})
 
