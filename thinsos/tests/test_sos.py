@@ -68,12 +68,15 @@ def test_get_foi2():
 
     assert isinstance(foi_df2, pd.DataFrame) & (len(foi_df2) >= 20)
 
-def test_get_observation2():
+def test_get_observation2a():
     obs_df2 = sos2.get_observation(foi2, observed_property2, from_date=from_date2, to_date=to_date2)
 
     assert isinstance(obs_df2, pd.DataFrame) & (len(obs_df2) == 5)
 
+def test_get_observation2b():
+    obs_df3 = sos2.get_observation(foi2, observed_property2)
 
+    assert isinstance(obs_df3, pd.DataFrame) & (len(obs_df3) > 200)
 
 
 
