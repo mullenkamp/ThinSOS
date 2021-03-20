@@ -347,16 +347,19 @@ class SOS(object):
         if isinstance(from_date, str):
             from_date1 = pd.Timestamp(from_date)
         else:
-            from_date1 = da1.fromDate.min()
+            from_date1 = da1.fromDate.tz_localize(None)
         if isinstance(to_date, str):
             to_date1 = pd.Timestamp(to_date)
         else:
-            to_date1 = da1.toDate.min()
+            to_date1 = da1.toDate.tz_localize(None)
 
-        dr1 = pd.date_range(from_date1, to_date1, freq='60M')
-        dr2 = [str(d) for d in dr1]
-        dr2[0] = str(from_date1)
-        dr2[-1] = str(to_date1)
+        if (to_date1 - from_date1).days < (366*24):
+            dr2 = [str(from_date1), str(to_date1)]
+        else:
+            dr1 = pd.date_range(from_date1, to_date1, freq='60M')
+            dr2 = [str(d) for d in dr1]
+            dr2[0] = str(from_date1)
+            dr2[-1] = str(to_date1)
 
         ### Iterate through each date range
         self.request = 'GetObservation'
