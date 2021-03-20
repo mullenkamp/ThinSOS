@@ -7,7 +7,7 @@ Created on Mon Apr 22 09:39:12 2019
 
 import requests
 import pandas as pd
-
+from time import sleep
 
 #############################################################
 ### Functions
@@ -336,30 +336,72 @@ class SOS(object):
         return df1
 
 
-    def get_observation(self, foi, observed_property, procedure=None, from_date='1900-01-01', to_date=None):
+    def get_observation(self, foi, observed_property, procedure=None, from_date=None, to_date=None):
         """
 
         """
+        ### Chunk up the requests for the sake of the source server
+        da1 = self.data_availability.copy()
+        da1 = da1[(da1.featureOfInterest == foi) & (da1.observedProperty == observed_property)].iloc[0]
+
+        if isinstance(from_date, str):
+            from_date1 = pd.Timestamp(from_date)
+        else:
+            from_date1 = da1.fromDate.min()
+        if isinstance(to_date, str):
+            to_date1 = pd.Timestamp(to_date)
+        else:
+            to_date1 = da1.toDate.min()
+
+        dr1 = pd.date_range(from_date1, to_date1, freq='60M')
+        dr2 = [str(d) for d in dr1]
+        dr2[0] = str(from_date1)
+        dr2[-1] = str(to_date1)
+
+        ### Iterate through each date range
         self.request = 'GetObservation'
-        body = self.filters(foi, procedure, observed_property, from_date, to_date)
-        body.update({'request': 'GetObservation'})
 
-        new_url = self._url_convert(body)
+        df_list = []
+        for i, d in enumerate(dr2[:-1]):
+            print(d)
+            from1 = d
+            to1 = dr2[i+1]
 
-        response = requests.get(new_url, headers=self.headers)
+            body = self.filters(foi, procedure, observed_property, from1, to1)
+            body.update({'request': 'GetObservation'})
 
-        try:
+            new_url = self._url_convert(body)
+
+            counter = 5
+            while counter > 0:
+                try:
+                    response = requests.get(new_url, headers=self.headers, timeout=120)
+                    break
+                except:
+                    print('Failed to extract data...trying again in 20 seconds...')
+                    counter = counter - 1
+                    sleep(20)
+                    if counter == 0:
+                        raise ValueError('Too many retries..something is wrong with the request.')
+
             response.raise_for_status()  # raise HTTP errors
-        except Exception as err:
-            print(err)
-            return response
 
-        json1 = response.json()['observations']
+            # try:
+            #     response.raise_for_status()  # raise HTTP errors
+            # except Exception as err:
+            #     print(err)
+            #     return response
 
-        if not json1:
-            return pd.DataFrame()
+            json1 = response.json()['observations']
 
-        df1 = obs_process(json1)
+            if json1:
+                df1 = obs_process(json1)
+                df_list.append(df1)
 
-        return df1
+        if df_list:
+            big_df = pd.concat(df_list)
+        else:
+            big_df = pd.DataFrame()
+
+        return big_df
 
