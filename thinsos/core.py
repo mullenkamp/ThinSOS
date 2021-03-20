@@ -402,7 +402,7 @@ class SOS(object):
                 df_list.append(df1)
 
         if df_list:
-            big_df = pd.concat(df_list)
+            big_df = pd.concat(df_list).drop_duplicates()
         else:
             big_df = pd.DataFrame()
 
