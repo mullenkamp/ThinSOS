@@ -402,7 +402,11 @@ class SOS(object):
                 df_list.append(df1)
 
         if df_list:
-            big_df = pd.concat(df_list).drop('parameter', axis=1).drop_duplicates()
+            big_df1 = pd.concat(df_list)
+            if 'parameter' in big_df1:
+                big_df = big_df1.drop('parameter', axis=1).drop_duplicates()
+            else:
+                big_df = big_df1.drop_duplicates()
         else:
             big_df = pd.DataFrame()
 
