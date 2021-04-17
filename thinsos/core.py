@@ -34,7 +34,7 @@ def obs_parse_iter(obs_dict):
     obs_dict2 = foi_parse(obs_dict['featureOfInterest'])
     obs_dict1.update(obs_dict2)
     obs_dict1.pop('featureOfInterest')
-    obs_dict1.pop('phenomenonTime')
+    # obs_dict1.pop('phenomenonTime')
 
     obs_dict1.update({'result': obs_dict1['result']['value'], 'uom': obs_dict1['result']['uom']})
 
@@ -75,7 +75,9 @@ def obs_process(obs_list):
         lst1 = [obs_parse_iter(j) for j in obs_list if isinstance(j, dict)]
 
     df1 = pd.DataFrame(lst1)
-    df1.resultTime = pd.to_datetime(df1.resultTime)
+    df1['resultTime'] = pd.to_datetime(df1['resultTime'])
+    if 'phenomenonTime' in df1:
+        df1['phenomenonTime'] = pd.to_datetime(df1['phenomenonTime'])
 
     return df1
 
@@ -402,7 +404,11 @@ class SOS(object):
                 df_list.append(df1)
 
         if df_list:
-            big_df = pd.concat(df_list).drop('parameter', axis=1).drop_duplicates()
+            big_df1 = pd.concat(df_list)
+            if 'phenomenonTime' in big_df1:
+                big_df = big_df1.drop_duplicates('phenomenonTime')
+            else:
+                big_df = big_df1.drop_duplicates('resultTime')
         else:
             big_df = pd.DataFrame()
 

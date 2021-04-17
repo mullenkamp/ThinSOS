@@ -18,7 +18,7 @@ foi1 = 'Vaisala-WXT520'
 observed_property1 = 'WindSpeedAverage'
 
 from_date1 = '2015-07-01'
-to_date1 = '2015-07-10'
+to_date1 = '2015-07-02'
 
 url2 = 'https://climate-sos.niwa.co.nz'
 
@@ -51,7 +51,7 @@ def test_get_foi1():
 def test_get_observation1():
     obs_df1 = sos1.get_observation(foi1, observed_property1, from_date=from_date1, to_date=to_date1)
 
-    assert isinstance(obs_df1, pd.DataFrame) & (len(obs_df1) >= 800)
+    assert isinstance(obs_df1, pd.DataFrame) & (len(obs_df1) >= 90)
 
 
 ## NIWA climate server
