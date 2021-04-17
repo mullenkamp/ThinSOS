@@ -336,7 +336,7 @@ class SOS(object):
         return df1
 
 
-    def get_observation(self, foi, observed_property, procedure=None, from_date=None, to_date=None):
+    def get_observation(self, foi, observed_property, procedure=None, from_date=None, to_date=None, retries=5):
         """
 
         """
@@ -375,10 +375,10 @@ class SOS(object):
 
             new_url = self._url_convert(body)
 
-            counter = 5
+            counter = retries
             while counter > 0:
                 try:
-                    response = requests.get(new_url, headers=self.headers, timeout=120)
+                    response = requests.get(new_url, headers=self.headers, timeout=150)
                     break
                 except:
                     print('Failed to extract data...trying again in 20 seconds...')
@@ -402,7 +402,7 @@ class SOS(object):
                 df_list.append(df1)
 
         if df_list:
-            big_df = pd.concat(df_list)
+            big_df = pd.concat(df_list).drop('parameter', axis=1).drop_duplicates()
         else:
             big_df = pd.DataFrame()
 
