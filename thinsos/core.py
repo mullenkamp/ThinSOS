@@ -8,6 +8,7 @@ Created on Mon Apr 22 09:39:12 2019
 import requests
 import pandas as pd
 from time import sleep
+import urllib.parse
 
 #############################################################
 ### Functions
@@ -149,8 +150,12 @@ class SOS(object):
         requests response
             Server response to response formatted as JSON
         """
-        new_body = [k+'='+body[k] for k in body]
-        new_url = self.url + '/?' + '&'.join(new_body)
+        # new_body = [k+'='+body[k] for k in body]
+        new_body = urllib.parse.urlencode(body, quote_via=urllib.parse.quote)
+
+        if self.url.endswith('/'):
+            url = self.url[:-1]
+        new_url = url + '/?' + new_body
 
         return new_url
 
@@ -390,12 +395,6 @@ class SOS(object):
                         raise ValueError('Too many retries..something is wrong with the request.')
 
             response.raise_for_status()  # raise HTTP errors
-
-            # try:
-            #     response.raise_for_status()  # raise HTTP errors
-            # except Exception as err:
-            #     print(err)
-            #     return response
 
             json1 = response.json()['observations']
 

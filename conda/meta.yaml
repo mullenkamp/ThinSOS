@@ -1,6 +1,6 @@
 {% set name = "ThinSOS" %}
-{% set version = "0.0.10" %}
-{% set sha256 = "91d00a0423104a42d412036988269f4f8ffd0aa06d322be72402c1ee41667b36" %}
+{% set version = "0.0.11" %}
+# {% set sha256 = "91d00a0423104a42d412036988269f4f8ffd0aa06d322be72402c1ee41667b36" %}
 
 # sha256 is the prefered checksum -- you can get it for a file with:
 #  `openssl sha256 <file name>`.
@@ -17,7 +17,7 @@ source:
   # If getting the source from GitHub remove the line above
   # uncomment the line below and modify as needed
   # url: https://github.com/simplejson/{{ name }}/archive/{{ version }}.tar.gz
-  sha256: {{ sha256 }}
+  # sha256: {{ sha256 }}
 
 build:
   # Uncomment the following line if the package is pure python and the recipe is exactly the same for all platforms.
