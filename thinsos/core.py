@@ -155,6 +155,9 @@ class SOS(object):
 
         if self.url.endswith('/'):
             url = self.url[:-1]
+        else:
+            url = self.url
+
         new_url = url + '/?' + new_body
 
         return new_url

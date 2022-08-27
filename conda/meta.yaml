@@ -1,5 +1,5 @@
 {% set name = "ThinSOS" %}
-{% set version = "0.0.11" %}
+{% set version = "0.0.12" %}
 # {% set sha256 = "91d00a0423104a42d412036988269f4f8ffd0aa06d322be72402c1ee41667b36" %}
 
 # sha256 is the prefered checksum -- you can get it for a file with:
