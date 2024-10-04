@@ -4,14 +4,42 @@ Created on Mon Apr 22 09:39:12 2019
 
 @author: michaelek
 """
-
-import requests
+import urllib3
+from urllib3.util import Retry, Timeout
+# import requests
 import pandas as pd
 from time import sleep
 import urllib.parse
 
 #############################################################
 ### Functions
+
+
+def session(max_pool_connections: int = 10, max_attempts: int=3, timeout: int=120):
+    """
+    Function to setup a urllib3 pool manager for url downloads.
+
+    Parameters
+    ----------
+    max_pool_connections : int
+        The number of simultaneous connections for the S3 connection.
+    max_attempts: int
+        The number of retries if the connection fails.
+    timeout: int
+        The timeout in seconds.
+
+    Returns
+    -------
+    Pool Manager object
+    """
+    timeout = urllib3.util.Timeout(timeout)
+    retries = Retry(
+        total=max_attempts,
+        backoff_factor=1,
+        )
+    http = urllib3.PoolManager(num_pools=max_pool_connections, timeout=timeout, retries=retries)
+
+    return http
 
 
 def foi_parse(foi_dict):
@@ -129,9 +157,9 @@ class SOS(object):
         self.token = str(token)
         self.headers = {'Authorization': str(token), 'Accept': 'application/json'}
         self.body_base = {"service": "SOS", "version": "2.0.0"}
+        self._session = session()
         self.capabilities = self.get_capabilities()
         self.data_availability = self.get_data_availability()
-#        self.foi = self.get_foi()
 
 
     def _url_convert(self, body):
@@ -268,16 +296,12 @@ class SOS(object):
 
             new_url = self._url_convert(body)
 
-            response = requests.get(new_url, headers=self.headers)
+            resp = self._session.request('get', new_url, headers=self.headers)
 
-            try:
-                response.raise_for_status()  # raise HTTP errors
-                json1 = response.json()
-            except Exception as err:
-                print(err)
-                return response
+            if resp.status != 200:
+                raise ValueError(resp.json())
 
-            return json1
+            return resp.json()
 
         else: # When no level input value matches
             print('--->> Error: The value for the "level" parameter is not valid!!')
@@ -297,14 +321,12 @@ class SOS(object):
 
         new_url = self._url_convert(body)
 
-        response = requests.get(new_url, headers=self.headers)
+        resp = self._session.request('get', new_url, headers=self.headers)
 
-        try:
-            response.raise_for_status()  # raise HTTP errors
-            json1 = response.json()['dataAvailability']
-        except Exception as err:
-            print(err)
-            return response
+        if resp.status != 200:
+            raise ValueError(resp.json())
+
+        json1 = resp.json()['dataAvailability']
 
         df1 = pd.DataFrame(json1)
         df1[['fromDate', 'toDate']] = pd.DataFrame(df1['phenomenonTime'].values.tolist(), columns=['fromDate', 'toDate'])
@@ -326,15 +348,12 @@ class SOS(object):
 
         new_url = self._url_convert(body)
 
-        response = requests.get(new_url, headers=self.headers)
+        resp = self._session.request('get', new_url, headers=self.headers)
 
-        try:
-            response.raise_for_status()  # raise HTTP errors
-        except Exception as err:
-            print(err)
-            return response
+        if resp.status != 200:
+            raise ValueError(resp.json())
 
-        json1 = response.json()['featureOfInterest']
+        json1 = resp.json()['featureOfInterest']
 
         lst1 = [foi_parse(j) for j in json1 if isinstance(j, dict)]
         df1 = pd.DataFrame(lst1)
@@ -385,21 +404,12 @@ class SOS(object):
 
             new_url = self._url_convert(body)
 
-            counter = retries
-            while counter > 0:
-                try:
-                    response = requests.get(new_url, headers=self.headers, timeout=150)
-                    break
-                except:
-                    print('Failed to extract data...trying again in 20 seconds...')
-                    counter = counter - 1
-                    sleep(20)
-                    if counter == 0:
-                        raise ValueError('Too many retries..something is wrong with the request.')
+            resp = self._session.request('get', new_url, headers=self.headers)
 
-            response.raise_for_status()  # raise HTTP errors
+            if resp.status != 200:
+                raise ValueError(resp.json())
 
-            json1 = response.json()['observations']
+            json1 = resp.json()['observations']
 
             if json1:
                 df1 = obs_process(json1)
@@ -432,6 +442,7 @@ class SOSish(object):
         self.token = str(token)
         self.headers = {'Authorization': str(token), 'Accept': 'application/json'}
         self.body_base = extra_params
+        self._session = session()
         self.data_availability = self.get_data_availability()
 
 
@@ -513,14 +524,12 @@ class SOSish(object):
 
         new_url = self._url_convert(body)
 
-        response = requests.get(new_url, headers=self.headers)
+        resp = self._session.request('get', new_url, headers=self.headers)
 
-        try:
-            response.raise_for_status()  # raise HTTP errors
-            json1 = response.json()['dataAvailability']
-        except Exception as err:
-            print(err)
-            return response
+        if resp.status != 200:
+            raise ValueError(resp.json())
+
+        json1 = resp.json()['dataAvailability']
 
         df1 = pd.DataFrame(json1)
         df1[['fromDate', 'toDate']] = pd.DataFrame(df1['phenomenonTime'].values.tolist(), columns=['fromDate', 'toDate'])
@@ -542,15 +551,12 @@ class SOSish(object):
 
         new_url = self._url_convert(body)
 
-        response = requests.get(new_url, headers=self.headers)
+        resp = self._session.request('get', new_url, headers=self.headers)
 
-        try:
-            response.raise_for_status()  # raise HTTP errors
-        except Exception as err:
-            print(err)
-            return response
+        if resp.status != 200:
+            raise ValueError(resp.json())
 
-        json1 = response.json()['featureOfInterest']
+        json1 = resp.json()['featureOfInterest']
 
         lst1 = [foi_parse(j) for j in json1 if isinstance(j, dict)]
         df1 = pd.DataFrame(lst1)
@@ -601,21 +607,12 @@ class SOSish(object):
 
             new_url = self._url_convert(body)
 
-            counter = retries
-            while counter > 0:
-                try:
-                    response = requests.get(new_url, headers=self.headers, timeout=150)
-                    break
-                except:
-                    print('Failed to extract data...trying again in 20 seconds...')
-                    counter = counter - 1
-                    sleep(20)
-                    if counter == 0:
-                        raise ValueError('Too many retries..something is wrong with the request.')
+            resp = self._session.request('get', new_url, headers=self.headers)
 
-            response.raise_for_status()  # raise HTTP errors
+            if resp.status != 200:
+                raise ValueError(resp.json())
 
-            json1 = response.json()['observations']
+            json1 = resp.json()['observations']
 
             if json1:
                 df1 = obs_process(json1)

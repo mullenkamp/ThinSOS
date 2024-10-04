@@ -1,7 +1,7 @@
 [project]
 name = "thinsos"
 authors = [
-  { name = "thinsos", email = "mullenkamp1@gmail.com" }
+  { name = "mullenkamp", email = "mullenkamp1@gmail.com" }
 ]
 description = 'Python API to the 52North SOS implementation'
 readme = "README.rst"
